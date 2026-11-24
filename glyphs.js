@@ -1,7 +1,10 @@
 // Glyph hover zones, measured from the Figma frames (coordinates in the 2132 × 3000 frame space).
+// The site shows each frame cropped to its page box (no spine/margin/border): 1986 × 2874,
+// starting at x = 83 on left pages (C, E, G, I) and 63 on the others, y = 63.
 // Hover spec from Figma frame "ON HOVER EXAMPLE": glyph grows 388 → 606 px (×1.5619),
 // anchored near its lower-left (origin 21% 88%), and its number turns red (#ff0000).
-const FRAME_W = 2132, FRAME_H = 3000;
+const FRAME_W = 1986, FRAME_H = 2874;
+const CROP_X = id => ('CEGI'.includes(id) ? 83 : 63), CROP_Y = 63;
 
 const NAMES = ['', 'Akai','Avoiuli (Vanuatu)','Bedifeera','Kaidā','Kokborok','Lampung','Loma','Naoriya Phulo','Ranjana','Zungkayu',
   'Gar','Shaaldaa (Oromo)','Dongba (Naxi)','Naxi Geba','Abkhaz-Kabardian','Lontara Bilang-Bilang','Lontara coda marks','Kamarupi (Assamese)',
@@ -42,7 +45,8 @@ function addGlyphHovers(section, id) {
   const pct = (v, total) => (v / total * 100) + '%';
   const layer = document.createElement('div'); layer.className = 'glyphs';
   layer.style.setProperty('--bg', BG[id]);
-  for (const g of list) {
+  for (const g0 of list) {
+    const dx = CROP_X(id), g = { ...g0, x: g0.x - dx, y: g0.y - CROP_Y, nx: g0.nx - dx, ny: g0.ny - CROP_Y };
     const isNum = /^\d+$/.test(g.label);
     const shown = isNum ? pad2(g.label) : (g.label.length < 3 ? 'C0' + g.label.slice(1) : g.label);
     const name = isNum ? NAMES[+g.label] : 'Chinese character ' + g.label;
