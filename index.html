@@ -31,7 +31,7 @@
   /* full-bleed: frames stacked edge to edge across the whole width */
   main { display:block; }
   section { width:100%; position:relative; scroll-margin-top:0; }
-  section img { display:block; width:100%; height:auto; aspect-ratio:1986/2874; }
+  section img { display:block; width:100%; height:auto; aspect-ratio:1440/900; }
   nav { mix-blend-mode:normal; }
 
   /* glyph hover (spec: Figma frame "ON HOVER EXAMPLE") */
@@ -53,7 +53,7 @@
   /* lightbox */
   #lightbox { position:fixed; inset:0; background:rgba(17,17,17,.94); z-index:30; display:none; overflow:auto; cursor:zoom-out; }
   #lightbox.open { display:block; }
-  #lightbox img { display:block; width:min(2132px, 180vw); margin:0 auto; }
+  #lightbox img { display:block; width:min(2880px, 200vw); margin:0 auto; }
   #lightbox .close { position:fixed; top:14px; right:18px; color:#fff; font:700 14px Inter, sans-serif; letter-spacing:.05em; }
 
   footer { text-align:center; color:var(--muted); font-size:12px; padding:4vh 0 6vh; }
@@ -87,7 +87,7 @@ const FRAMES = [
 const main = document.getElementById('frames'), nav = document.getElementById('nav');
 FRAMES.forEach((f, i) => {
   const s = document.createElement('section'); s.id = f.id;
-  s.innerHTML = `<img src="frames/${f.id}.webp" alt="${f.alt}" width="1986" height="2874" ${i>1?'loading="lazy"':''} decoding="async">`;
+  s.innerHTML = `<img src="frames/${f.id}.webp" alt="${f.alt}" width="1440" height="900" ${i>1?'loading="lazy"':''} decoding="async">`;
   main.appendChild(s);
   addGlyphHovers(s, f.id);
   const a = document.createElement('a'); a.href = '#'+f.id; a.textContent = f.id; a.title = f.alt;

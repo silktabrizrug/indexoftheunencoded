@@ -1,10 +1,7 @@
-// Glyph hover zones, measured from the Figma frames (coordinates in the 2132 × 3000 frame space).
-// The site shows each frame cropped to its page box (no spine/margin/border): 1986 × 2874,
-// starting at x = 83 on left pages (C, E, G, I) and 63 on the others, y = 63.
-// Hover spec from Figma frame "ON HOVER EXAMPLE": glyph grows 388 → 606 px (×1.5619),
-// anchored near its lower-left (origin 21% 88%), and its number turns red (#ff0000).
-const FRAME_W = 1986, FRAME_H = 2874;
-const CROP_X = id => ('CEGI'.includes(id) ? 83 : 63), CROP_Y = 63;
+// Glyph hover zones, measured from the 1440 × 900 desktop frames in Figma (page "Page 2").
+// Hover spec from Figma frame "ON HOVER EXAMPLE": the glyph grows ×1.5619, anchored near its
+// lower-left (origin 21% 88%), and its number turns red (#ff0000).
+const FRAME_W = 1440, FRAME_H = 900;
 
 const NAMES = ['', 'Akai','Avoiuli (Vanuatu)','Bedifeera','Kaidā','Kokborok','Lampung','Loma','Naoriya Phulo','Ranjana','Zungkayu',
   'Gar','Shaaldaa (Oromo)','Dongba (Naxi)','Naxi Geba','Abkhaz-Kabardian','Lontara Bilang-Bilang','Lontara coda marks','Kamarupi (Assamese)',
@@ -15,38 +12,33 @@ const NAMES = ['', 'Akai','Avoiuli (Vanuatu)','Bedifeera','Kaidā','Kokborok','L
   'Ygyde','Standard Galactic','Visible Speech','Tramp signs','Irony mark','Love mark','Acclamation mark','Authority mark','Conviction mark',
   'Doubt mark','Indignation mark','Exclamation comma'];
 
-function grid({ xs, ys, size, numGap, numSize, numBox, labels }) {
-  const out = []; let i = 0;
-  for (const y of ys) for (const x of xs) {
-    if (i >= labels.length) break;
-    out.push({ label: labels[i++], x, y, size, nx: x, ny: y + numGap, numSize, numBox });
-  }
-  return out;
+// Each grid: first glyph at (56, ys[row]), columns `step` apart; number sits `numGap` below the glyph top.
+function grid({ step, cols, ys, size, numGap, numSize, numBox, labels }) {
+  return labels.map((label, i) => {
+    const x = 56 + (i % cols) * step, y = ys[Math.floor(i / cols)];
+    return { label, x, y, size, nx: x, ny: y + numGap, numSize, numBox };
+  });
 }
 const range = (a, b, pre = '') => Array.from({ length: b - a + 1 }, (_, k) => pre + (a + k));
-const big = { size: 388, numGap: 396, numSize: 28, numBox: 35 };
-const small = { size: 164, numGap: 170, numSize: 22, numBox: 27 };
-const xs4a = [140, 608, 1076, 1544], xs4b = [120, 588, 1056, 1524];
-const xs8a = Array.from({ length: 8 }, (_, i) => 140 + 234 * i), xs8b = Array.from({ length: 8 }, (_, i) => 120 + 234 * i);
 const pad2 = n => String(n).padStart(2, '0');
+const big = { numSize: 13, numBox: 16 }, small = { numSize: 11, numBox: 13 };
 
 const GLYPHS = {
-  C: grid({ ...big, xs: xs4a, ys: [364, 993, 1622, 2251], labels: range(1, 16) }),
-  D: grid({ ...big, xs: xs4b, ys: [364, 993, 1622, 2251], labels: range(17, 32) }),
-  E: grid({ ...big, xs: xs4a, ys: [364, 867, 1370, 1874], labels: range(33, 46) }),
-  F: grid({ ...big, xs: xs4b, ys: [364, 867, 1370, 1874, 2377], labels: range(47, 65) }),
-  G: grid({ ...small, xs: xs8a, ys: [364, 616, 867, 1119, 1370, 1622, 1874, 2125, 2377, 2628], labels: range(1, 75, 'C') }),
-  H: grid({ ...small, xs: xs8b, ys: [402, 650, 898, 1145, 1393, 1641, 1889, 2137, 2384, 2632], labels: range(76, 150, 'C') }),
+  C: grid({ ...big, step: 226, cols: 6, ys: [154, 391, 628], size: 198, numGap: 202, labels: range(1, 16) }),
+  D: grid({ ...big, step: 226, cols: 6, ys: [154, 391, 628], size: 198, numGap: 202, labels: range(17, 32) }),
+  E: grid({ ...big, step: 227, cols: 5, ys: [154, 392, 630], size: 199, numGap: 203, labels: range(33, 46) }),
+  F: grid({ ...big, step: 193, cols: 7, ys: [154, 358, 562], size: 165, numGap: 169, labels: range(47, 65) }),
+  G: grid({ ...small, step: 103, cols: 13, ys: [154, 271, 388, 505, 622, 739], size: 89, numGap: 93, labels: range(1, 75, 'C') }),
+  H: grid({ ...small, step: 100, cols: 13, ys: [173, 287, 401, 515, 629, 743], size: 86, numGap: 90, labels: range(76, 150, 'C') }),
 };
-const BG = { C: '#ff6543', D: '#ff6543', E: '#f7ff00', F: '#f7ff00', G: '#ff6543', H: '#ff6543' };
+const BG = { C: '#ff6543', D: '#ff6543', E: '#f6ff00', F: '#f6ff00', G: '#ff6543', H: '#ff6543' };
 
 function addGlyphHovers(section, id) {
   const list = GLYPHS[id]; if (!list) return;
   const pct = (v, total) => (v / total * 100) + '%';
   const layer = document.createElement('div'); layer.className = 'glyphs';
   layer.style.setProperty('--bg', BG[id]);
-  for (const g0 of list) {
-    const dx = CROP_X(id), g = { ...g0, x: g0.x - dx, y: g0.y - CROP_Y, nx: g0.nx - dx, ny: g0.ny - CROP_Y };
+  for (const g of list) {
     const isNum = /^\d+$/.test(g.label);
     const shown = isNum ? pad2(g.label) : (g.label.length < 3 ? 'C0' + g.label.slice(1) : g.label);
     const name = isNum ? NAMES[+g.label] : 'Chinese character ' + g.label;
